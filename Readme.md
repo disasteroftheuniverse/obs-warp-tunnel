@@ -7,7 +7,7 @@
 </pre> 
 # OBS Warp Tunnel   
 
-A simple wrapper for localtunnel that keeps it running. Intended to be used with [OBS Blade](https://obs-blade.kounex.com/) to remotely control [OBS](https://obsproject.com/). Localtunnel is unstable and crashes frequently, making it unsuitable for IRL streamers. This script keeps the desired subdomain intact and automatically restarts localtunnel if it crashes. This makes localtunnel a viable choice for IRL streamers who wish to use OBS Blade to remotely control OBS.
+A simple wrapper for [localtunnel](https://theboroer.github.io/localtunnel-www/) that keeps it running. Intended to be used with [OBS Blade](https://obs-blade.kounex.com/) to remotely control [OBS](https://obsproject.com/). Localtunnel is unstable and crashes frequently, making it unsuitable for IRL streamers. This script keeps the desired subdomain intact and automatically restarts localtunnel if it crashes. This makes localtunnel a viable choice for IRL streamers who wish to use OBS Blade to remotely control OBS.
 
 This tool helps make Localtunnel a more viable alternative to ngrok.
 
