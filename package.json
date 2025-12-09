@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
+  "module": "true",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node main"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "colors": "^1.4.0",
     "dotenv": "^17.2.3",
-    "localtunnel": "^2.0.2",
-    "yargs": "^18.0.0"
+    "localtunnel": "^2.0.2"
   }
 }
