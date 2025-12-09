@@ -7,7 +7,7 @@
 </pre> 
 # OBS Warp Tunnel   
 
-A simple wrapper for localtunnel that keeps it running. Intended to be with OBS Blade so OBS can be manipulated remotely. Local tunnel is unstable and likes to crash, this script maintains uptime, and keeps the subdomain, as losing a subdomain can be very inconvenient if it is lost while using OBS Blade in a remote location. Ideal for IRL streamers. Future versions will use electron for a simple user interface.
+A simple wrapper for localtunnel that keeps it running. Intended to be with [OBS Blade](https://obs-blade.kounex.com/) so [OBS](https://obsproject.com/) can be manipulated remotely. Local tunnel is unstable and likes to crash, this script maintains uptime, and keeps the subdomain, as losing a subdomain can be very inconvenient if it is lost while using OBS Blade in a remote location. Ideal for IRL streamers. Future versions will use electron for a simple user interface. This probably works with Streamlabs too, but don't ask me for help, I have no idea.
 
 ## Installation
 
