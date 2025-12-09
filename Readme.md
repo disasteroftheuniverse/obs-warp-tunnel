@@ -7,7 +7,7 @@
 </pre> 
 # OBS Warp Tunnel   
 
-A simple wrapper for localtunnel that keeps it running OBS Blade so it can be used remotely. Future versions will use electron for a simple user interface.
+A simple wrapper for localtunnel that keeps it running. Intended to be with OBS Blade so OBS can be manipulated remotely. Local tunnel is unstable and likes to crash, this script maintains uptime, and keeps the subdomain, as losing a subdomain can be very inconvenient if it is lost while using OBS Blade in a remote location. Ideal for IRL streamers. Future versions will use electron for a simple user interface.
 
 ## Installation
 
