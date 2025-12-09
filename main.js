@@ -5,7 +5,7 @@ import validator from 'validator';
 const { trim, whitelist } = validator;
 dotenv.config({ path: './.env' });
 
-//only display URL once, dirty setter just tracks if we showed the url or not
+//only display URL once, dirty setter just tracks if showed the url or not
 var dirty = false;
 
 //not sure why validator doesn't just use regex but this wasn't too tedious to just use a whitelist
@@ -28,17 +28,21 @@ function GetTimestamp() {
  * @returns {tunnel}
  */
 async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
+
     //I wish js had type casting
     port = Number(port);
     subdomain = String(subdomain);
     autorestart = Boolean(autorestart);
     delay = Number(delay);
+
+    
     return new Promise((resolve, reject) => {
         localtunnel({ port, subdomain })
             .then(tunnel => {
                 let url = tunnel.url.split(':');
                 url = `wss:${url[1]}`
 
+                //show instructions in console once
                 if (!dirty) {
                     dirty = true;
                     console.log('\nYour OBS Blade subdomain is: ');
@@ -63,23 +67,28 @@ async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
 
             })
             .catch(err => {
+
                 //log errors
                 console.log(GetTimestamp(), colors.red(err))
-
-                //this should be considered the default
                 if (autorestart) {
                     if (delay > 0) {
                         console.log(GetTimestamp(), colors.yellow(`Restarting connection in ${delay}ms...`));
+
+                //autorestart with delay
                         setTimeout(() => {
                             console.log(GetTimestamp(), colors.yellow("Restarting Connection!"));
                             return resolve(StartTunnel(port, subdomain, autorestart, delay));
                         }, delay);
                     }
                     else {
+
+                //autorestart
                         console.log(GetTimestamp(), colors.yellow("Restarting Connection!"));
                         return resolve(StartTunnel(port, subdomain, autorestart, delay));
                     }
                 } else {
+
+                //close connection without autorestart
                     console.log(GetTimestamp(), colors.bgRed.black("Closing Connection!"));
                     return resolve(process.exit(1));
                 }
@@ -89,11 +98,14 @@ async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
 
 
 function main() {
-    let {PORT , AUTORESTART, SUBDOMAIN, DELAY } = process.env;
-    //make sure that only valid characters are used in the subdomain
-    SUBDOMAIN = whitelist(trim(SUBDOMAIN),WHITELISTED_CHARACTERS);
-    //show instructions in console
 
+    //get settings from env file
+    let {PORT , AUTORESTART, SUBDOMAIN, DELAY } = process.env;
+
+    //make sure that only valid characters are used in the subdomain with validation
+    SUBDOMAIN = whitelist(trim(SUBDOMAIN),WHITELISTED_CHARACTERS);
+
+    //start tunnel
     StartTunnel( PORT, SUBDOMAIN, AUTORESTART, DELAY );
 }
 
