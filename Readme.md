@@ -12,7 +12,7 @@ A simple wrapper for localtunnel that keeps it running OBS Blade so it can be us
 ## Installation
 
 ```
-> git clone https://github.com/disasteroftheuniverse/obs-warp-tunnel 
+> git clone https://github.com/disasteroftheuniverse/obs-warp-tunnel.git
 & cd obs-warp-tunnel 
 & npm install
 ```
