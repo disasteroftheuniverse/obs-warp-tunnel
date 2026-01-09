@@ -2,11 +2,19 @@ import localtunnel from 'localtunnel';
 import dotenv from 'dotenv';
 import colors from 'colors';
 import validator from 'validator';
+import { createInterface } from 'readline';
+
+// dumb workaround to make ctrl+c nicely end the process on windows
+const rl = createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+  rl.on("SIGINT", function () {
+    process.emit("SIGINT");
+  });
+
 const { trim, whitelist } = validator;
 dotenv.config({ path: './.env' });
-
-//only display URL once, dirty setter just tracks if showed the url or not
-var dirty = false;
 
 //not sure why validator doesn't just use regex but this wasn't too tedious to just use a whitelist
 const WHITELISTED_CHARACTERS = `abcdefghijklmnopqrstuvwxyz-`;
@@ -16,46 +24,49 @@ const WHITELISTED_CHARACTERS = `abcdefghijklmnopqrstuvwxyz-`;
  * @returns {String} timestamp in miliseconds
  */
 function GetTimestamp() {
-    return new Date().getTime();
+    let datenow = new Date();
+    return datenow.toISOString().replace("T"," ").substring(0, 19);
+    //return new Date().getTime();
 }
 
 /**
  * Creates a VPN tunnel exposed to the outside network; LocalTunnel is prone to crashes, this program helps keep it online
  * @param {Number} port Integer UDP Websocket port for OBS Remote controller
+ * @param {Number} delay time in miliseconds to restarts server, must be at least 1000
  * @param {String} subdomain desired prefix for OBS Blade
- * @param {Boolean} autorestart automatically restart the program
- * @param {Number} delay miliseconds to delay beteween restarting
  * @returns {tunnel}
  */
-async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
+function StartTunnel(port = 4455, delay = 100, subdomain) {
 
     //I wish js had type casting
-    port = Number(port);
-    subdomain = String(subdomain);
-    autorestart = Boolean(autorestart);
-    delay = Number(delay);
+    if (typeof port != 'number' ) port = Number(port);
+    if (typeof subdomain != 'string' ) subdomain = String(subdomain);
+    if (typeof delay != 'number' ) delay = Number(delay);
+    if (delay < 100) delay = 100;
 
-    
     return new Promise((resolve, reject) => {
         localtunnel({ port, subdomain })
             .then(tunnel => {
                 let url = tunnel.url.split(':');
                 url = `wss:${url[1]}`
-
                 //show instructions in console once
-                if (!dirty) {
-                    dirty = true;
-                    console.log('\nYour OBS Blade subdomain is: ');
-                    console.log(colors.bgWhite.black(`${url}\n`));
-                }
+                console.log('\nYour OBS Blade subdomain is: ');
+                console.log(colors.bgWhite.black(`${url}\n`));
 
                 //log restarts
                 console.log(`${GetTimestamp()}: Local Tunnel started at ${url}:${port}`);
 
                 //log requests, makes the program feel like its doing something
                 tunnel.on('request', (info) => {
-                    console.log(GetTimestamp(), info);
+                    console.log(GetTimestamp(), info );
                 })
+
+                process.on("SIGINT", function () {
+                    //graceful shutdown
+                    console.log(GetTimestamp(), "Shutting down...");
+                    tunnel.close();
+                    return resolve(process.exit());
+                });
 
                 // localtunnel is fond of crashing for no obvious reason, 
                 // this will happen often, end the promise,
@@ -63,36 +74,19 @@ async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
                 tunnel.on('error', (err) => {
                     return reject(err);
                 })
-
-
             })
-            .catch(err => {
-
-                //log errors
-                console.log(GetTimestamp(), colors.red(err))
-                if (autorestart) {
-                    if (delay > 0) {
-                        console.log(GetTimestamp(), colors.yellow(`Restarting connection in ${delay}ms...`));
-
-                //autorestart with delay
-                        setTimeout(() => {
-                            console.log(GetTimestamp(), colors.yellow("Restarting Connection!"));
-                            return resolve(StartTunnel(port, subdomain, autorestart, delay));
-                        }, delay);
-                    }
-                    else {
-
-                //autorestart
-                        console.log(GetTimestamp(), colors.yellow("Restarting Connection!"));
-                        return resolve(StartTunnel(port, subdomain, autorestart, delay));
-                    }
-                } else {
-
-                //close connection without autorestart
-                    console.log(GetTimestamp(), colors.bgRed.black("Closing Connection!"));
-                    return resolve(process.exit(1));
-                }
+            .catch(err=>{
+                return reject(err);
             })
+    })
+    .catch(err => {
+        //log errors
+        console.log(GetTimestamp(), colors.red(err));
+
+        //restart the server in 100ms
+        setTimeout(()=>{
+            StartTunnel(port, delay, subdomain);
+        }, delay) 
     })
 }
 
@@ -100,13 +94,12 @@ async function StartTunnel(port = 4455, subdomain, autorestart, delay) {
 function main() {
 
     //get settings from env file
-    let {PORT , AUTORESTART, SUBDOMAIN, DELAY } = process.env;
+    let {PORT, SUBDOMAIN, DELAY } = process.env;
 
     //make sure that only valid characters are used in the subdomain with validation
     SUBDOMAIN = whitelist(trim(SUBDOMAIN),WHITELISTED_CHARACTERS);
 
-    //start tunnel
-    StartTunnel( PORT, SUBDOMAIN, AUTORESTART, DELAY );
+    StartTunnel( PORT, DELAY, SUBDOMAIN );
 }
 
 
