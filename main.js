@@ -4,6 +4,8 @@ import colors from 'colors';
 import validator from 'validator';
 import { createInterface } from 'readline';
 
+
+
 // dumb workaround to make ctrl+c nicely end the process on windows
 const rl = createInterface({
   input: process.stdin,
@@ -72,6 +74,7 @@ function StartTunnel(port = 4455, delay = 100, subdomain) {
                 // this will happen often, end the promise,
                 // catch the error and move on to error handling
                 tunnel.on('error', (err) => {
+                    tunnel.close();
                     return reject(err);
                 })
             })
@@ -92,8 +95,6 @@ function StartTunnel(port = 4455, delay = 100, subdomain) {
 
 
 function main() {
-
-    //get settings from env file
     let {PORT, SUBDOMAIN, DELAY } = process.env;
 
     //make sure that only valid characters are used in the subdomain with validation
@@ -104,3 +105,4 @@ function main() {
 
 
 main();
+
